@@ -3,8 +3,8 @@ using System.Collections;
 
 public class NewBehaviourScript : MonoBehaviour {
 	private float tScale;
-	private Vector2 vel;
-	private Vector2 accel;
+	private Vector3 vel;
+	private Vector3 accel;
 	private float mass;
 	private float modulus;					//탄성 계수
 
@@ -15,10 +15,10 @@ public class NewBehaviourScript : MonoBehaviour {
 		Debug.Log ("Obj start");
 
 		tScale = 0.1f;
-		vel.x = vel.y = 0.0f;
+		vel.x = vel.y = vel.z = 0.0f;
 		mass = 1.0f;
 
-		accel.x = accel.y = 0.0f;
+		accel.x = accel.y = accel.z = 0.0f;
 
 		modulus = 0.8f;
 
@@ -31,19 +31,19 @@ public class NewBehaviourScript : MonoBehaviour {
 
 		//calc velocity
 		vel.x += accel.x * tScale;
-		vel.y += accel.y * tScale;
+		vel.z += accel.z * tScale;
 
 		//change position
 		Vector3 tPos;
 		tPos = this.transform.position;
 		tPos.x += vel.x * tScale;
-		tPos.z += vel.y * tScale;
+		tPos.z += vel.z * tScale;
 
 		this.transform.position = tPos;
 
 		//change force
 		if(Input.GetKeyDown(KeyCode.UpArrow)){
-			accel.y += 0.1f;
+			accel.z += 0.1f;
 		}
 
 		if(Input.GetKeyDown(KeyCode.LeftArrow)){
@@ -51,7 +51,7 @@ public class NewBehaviourScript : MonoBehaviour {
 		}
 
 		if(Input.GetKeyDown(KeyCode.DownArrow)){
-			accel.y -= 0.1f;
+			accel.z -= 0.1f;
 		}
 		
 		if(Input.GetKeyDown(KeyCode.RightArrow)){
@@ -59,18 +59,23 @@ public class NewBehaviourScript : MonoBehaviour {
 		}
 
 		if(Input.GetKeyDown(KeyCode.Space)){
-			accel.x = accel.y = 0.0f;
+			accel.x = accel.y = accel.z = 0.0f;
 		}
 
-		Debug.Log (accel);
+		//Debug.Log (accel);
 	}
 
 	void OnCollisionEnter( Collision col ) {
-		Debug.Log ("Collision Detected");
 		//transform.position = prevPosition;
 
-		vel.x *= -1.0f * modulus;
-		vel.y *= -1.0f * modulus;
+		Vector3 CollisionNormal = col.contacts [0].normal;
+		float collisionpow = Vector3.Dot (vel, CollisionNormal) * -1.0f;
+
+		Vector3 tK = vel + CollisionNormal * collisionpow;
+		vel = 2.0f * tK - vel;
+
+		//vel.x *= -1.0f * modulus;
+		//vel.y *= -1.0f * modulus;
 	}
 
 	void OnCollisionStay(Collision collisionInfo){
